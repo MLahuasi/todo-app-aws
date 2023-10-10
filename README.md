@@ -57,7 +57,25 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 **Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
 ```
-docker build --tag todo-app:1.0.0 .
-docker container run -dp 3005:80 --name todo-app-gitactions todo-app:1.0.0
-``
+docker build -t jmlqtest/to-do .
+docker container run -dp 85:80 --name to-do-gitactions jmlqtest/to-do
+
+
+<!-- Subir a Docker Hub -->
+docker push jmlqtest/to-do
+docker image tag jmlqtest/to-do:latest jmlqtest/to-do:1.0.0
+docker push jmlqtest/to-do:1.0.0
+
+<!-- Descargar Imagen Docker Hub -->
+docker pull jmlqtest/to-do:1.0.0
+
+kubectl apply -f todo-app.yml
+kubectl get pods --watch
+minikube service todo-app-service
+
+<!-- Eliminar -->
+kubectl get deployments
+kubectl delete deployment todo-app-deployment
+kubectl get services
+kubectl delete service todo-app-service
 ```

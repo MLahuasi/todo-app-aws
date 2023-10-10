@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-app
+  template:
+    metadata:
+      labels:
+        app: todo-app
+    spec:
+      containers:
+        - name: todo-app
+          image: jmlqtest/to-do
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  # Servicio que va a comunicar a los contenedores por su IP
+  name: todo-app-service
+spec:
+  # Exponer el servicio al mundo exterior
+  type: NodePort
+  selector:
+    app: todo-app
+  ports:
+    - protocol: TCP
+      port: 80 # Puede ser cualquier puerto - Este puerto se expone
+      targetPort: 80
+      # Puero que se expone al mundo exterior. NOTA: El rango aceptado es entre 30000-32767
+      nodePort: 30200
