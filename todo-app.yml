@@ -30,7 +30,7 @@ spec:
     app: todo-app
   ports:
     - protocol: TCP
-      port: 80 # Puede ser cualquier puerto - Este puerto se expone
+      port: 80 
       targetPort: 80
       # Puero que se expone al mundo exterior. NOTA: El rango aceptado es entre 30000-32767
       nodePort: 30200

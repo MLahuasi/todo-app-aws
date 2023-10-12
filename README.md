@@ -57,25 +57,224 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 **Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
 ```
-docker build -t jmlqtest/to-do .
-docker container run -dp 85:80 --name to-do-gitactions jmlqtest/to-do
+    docker build -t jmlqtest/to-do .
+    docker container run -dp 85:80 --name to-do-gitactions jmlqtest/to-do
 
 
-<!-- Subir a Docker Hub -->
-docker push jmlqtest/to-do
-docker image tag jmlqtest/to-do:latest jmlqtest/to-do:1.0.0
-docker push jmlqtest/to-do:1.0.0
+    <!-- Subir a Docker Hub -->
+    docker push jmlqtest/to-do
+    <!-- Crear un tag -->
+    docker image tag jmlqtest/to-do:latest jmlqtest/to-do:1.0.0
+    docker push jmlqtest/to-do:1.0.0
 
-<!-- Descargar Imagen Docker Hub -->
-docker pull jmlqtest/to-do:1.0.0
+    <!-- Descargar Imagen Docker Hub -->
+    docker pull jmlqtest/to-do
 
-kubectl apply -f todo-app.yml
-kubectl get pods --watch
-minikube service todo-app-service
+    <!-- Ejecutar Kubernete -->
+    kubectl apply -f todo-app.yml
+    kubectl get pods --watch
+    minikube service todo-app-service
 
-<!-- Eliminar -->
-kubectl get deployments
-kubectl delete deployment todo-app-deployment
-kubectl get services
-kubectl delete service todo-app-service
+    <!-- Eliminar -->
+    kubectl get deployments
+    kubectl delete deployment todo-app-deployment
+    kubectl get services
+    kubectl delete service todo-app-service
 ```
+
+## PUBLICAR EN AWS
+
+### **Configurar AWS CLI**
+
+> > 1.  Descargar e Instalar [AWS CLI](https://docs.aws.amazon.com/es_es/cli/latest/userguide/getting-started-install.html)
+
+> > 2.  Validar Version
+
+```
+        aws --version
+```
+
+> > 3.  Confogurar Login AWS
+
+```
+        aws configure
+```
+
+### CONFIGURAR ECR
+
+> > **CREAR POLITICA PARA USO DE ECR**
+
+Esta política se debe asignar al usuaio con el que se va a acceder desde AWS CLI
+
+```
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "Statement1",
+			"Effect": "Allow",
+			"Action": [
+				"ecr:BatchGetImage",
+				"ecr:BatchCheckLayerAvailability",
+				"ecr:CompleteLayerUpload",
+				"ecr:GetDownloadUrlForLayer",
+				"ecr:InitiateLayerUpload",
+				"ecr:PutImage",
+				"ecr:UploadLayerPart",
+				"ecr:CreateRepository",
+				"ecr:DescribeImages",
+				"ecr:GetAuthorizationToken",
+				"ecr:DeleteRepository",
+				"ecr:DescribeRepositories",
+				"ecr-public:BatchCheckLayerAvailability",
+				"ecr-public:PutImage",
+				"ecr-public:CreateRepository",
+				"ecr-public:DescribeImages",
+				"ecr-public:GetAuthorizationToken",
+				"ecr-public:DeleteRepository",
+				"ecr-public:DescribeRepositories",
+				"sts:GetServiceBearerToken"
+			],
+			"Resource": "*"
+		}
+	]
+}
+```
+
+### **CONFIGURAR CREDENCIALES AWS**
+
+> 1. Ejecutar
+
+```
+        aws configure
+```
+
+> 2. Ingresar Key del Usuario y la region (ECR-Public us-east-2 | ECR us-east-1)
+
+```
+        AWS Access Key ID [****************NHDW]: ****************NHDW
+        AWS Secret Access Key [****************Agmu]: ****************Agmu
+        Default region name [us-east-2]: us-east-2
+        Default output format [json]: json
+```
+
+### **CREAR REPOSITORIO PRIVADO**
+
+> 1. Ingresar a la [ECR](https://us-east-2.console.aws.amazon.com/ecr/home?region=us-east-2) Amazon Elastic Container Registry.
+>    > ![](./assets/1-ECR-Comenzar.png)
+
+> 2. Crear Repositorio **PRIVADO**
+>    > ![](./assets/1-ECR-Repositorio.png)
+
+> 3. Ingresar al Repositorio
+>    > ![](./assets/1-ECR-Ingresar-Repositorio.png)
+
+> 4. Ver comandos de Envío
+>    > ![](./assets/1-ECR-Comandos-Envio.png)
+
+> 5. Seguir las siguientes instrucciones
+>    > ![](./assets/1-ECR-Seguir-Instrucciones.png)
+
+### **PUBLICAR IMAGEN DOCKER EN ECR PRIVADO**
+
+> 1. Autentificación
+
+```
+        aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 425536599249.dkr.ecr.us-east-2.amazonaws.com
+```
+
+> 2. Crear imagen en Docker
+
+```
+        docker build -t jmlq/todo-app .
+```
+
+> 3. Crear un tag en la imagen
+
+```
+        docker tag jmlq/todo-app:latest 425536599249.dkr.ecr.us-east-2.amazonaws.com/jmlq/todo-app:latest
+```
+
+> 4. Enviar imagen al repositorio ECR AWS
+
+```
+        docker push 425536599249.dkr.ecr.us-east-2.amazonaws.com/jmlq/todo-app:latest
+```
+
+### [CI/CD - AWS - EKS + Github Actions](https://github.com/eksctl-io/eksctl/blob/main/README.md#installation)
+
+#### [**PERMISOS USUARIO**](https://eksctl.io/installation/)
+
+| AWS Service      | Access Level                                       |
+| ---------------- | -------------------------------------------------- |
+| CloudFormation   | Full Access                                        |
+| EC2              | Full: Tagging Limited: List, Read, Write           |
+| EC2 Auto Scaling | Limited: List, Write                               |
+| EKS              | Full Access                                        |
+| IAM              | Limited: List, Read, Write, Permissions Management |
+| Systems Manager  | Limited: List, Read                                |
+
+> > Ver [Politica](./assets/politica-eks.json)
+
+#### **CREAR VPC**
+
+> 1. Crear VPC
+>    > ![](./assets/2-EKS-VPC-Crear.png)
+
+> 2. Configurar VPC: Numero de zonas 2, Cantidad de Subredes publicas 2, Cantidad de Subredes privadas 2
+>    > ![](./assets/2-EKS-VPC-Configurar.png)
+
+> > - Vista Previa
+> >   > ![](./assets/2-EKS-VPC-Configurar-VistaPrevia.png)
+
+> 3. Flujo de trabajo
+>    > ![](./assets/2-EKS-VPC-FlijoTrabajo.png)
+
+> 4. Ver VPC
+>    > ![](./assets/2-EKS-VPC.png)
+
+> 5. Editar Subnet
+>    > ![](./assets/2-EKS-VPC-Subnet-Editar.png)
+
+> 6. Habilitar IPv4 Publica
+>    > ![](./assets/2-EKS-VPC-Subnet-HabilitarIPv4Publica.png)
+
+#### [**CREAR CLUSTER USANDO EKSCTL**](https://github.com/davejfranco/youtube-tutorial-src/blob/master/tutoriales/kubernetes/eksctl/TUTORIAL.md)
+
+> 1.  Descargar [eksctl](https://github.com/eksctl-io/eksctl/blob/main/README.md#installation) es una herramienta de línea de comandos para crear y administrar clústeres de Kubernetes en Amazon EKS.
+
+```
+        eksctl version
+
+        NOTA: tambien se puede ejecutar: choco install eksctl
+```
+
+> 2. Crear Archivo [Cluster](./cluster.yml)
+
+> 3.  Crear un Cluster EKS usando este comando:
+
+```
+        eksctl create cluster -f cluster.yml
+```
+
+> 4. Colocar un alias al Cluster
+
+```
+        aws eks update-kubeconfig --region us-east-2 --name name-cluster --alias nombre-alias
+```
+
+> 5. Obtener los nodos
+
+```
+        k get nodes
+```
+
+> 6. Eliminar Cluster EKS - Cuando ya no se usa
+
+```
+        eksctl delete cluster --name jmlq-eks-test
+```
+
+#### [**GITHUB ACTIONS**](https://docs.github.com/es/actions)
+
+> 1. Archivo GitHub Actions [Github Actions](./.github/workflows/github-actions-ci.yml)

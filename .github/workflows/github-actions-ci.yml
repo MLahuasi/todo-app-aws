@@ -1,0 +1,26 @@
+name: Node js app deploy to EKS
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Se descarga el código en el branch
+      - name: Checkout
+        uses: actions/checkout@v3
+      # Instalar dependencias. | permite escribir varios comandos
+      # Ejemplo: cd app && yarn install
+      # Tambien se puede definir el directorio raiz:
+      - name: Install dependences
+        run: |
+          yarn install
+        # working-directory: ./app
+      # Ejecutar Pruebas
+      - name: Run Test
+        run: |
+          yarn test-mock
