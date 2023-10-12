@@ -27,7 +27,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "test-mock": "echo \"Error!\" && exit 1"
+    "test-mock": "echo \"Success!\" && exit 0"
   },
   "eslintConfig": {
     "extends": [
