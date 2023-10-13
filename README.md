@@ -158,23 +158,23 @@ Esta [política](./assets/politica-ecr.json) se debe asignar al usuaio con el qu
 
 1. Ingresar a la [ECR](https://us-east-2.console.aws.amazon.com/ecr/home?region=us-east-2) Amazon Elastic Container Registry.
 
-> > ![](./assets/1-ECR-Comenzar.png)
+![](./assets/1-ECR-Comenzar.png)
 
 2. Crear Repositorio **PRIVADO**
 
-> > ![](./assets/1-ECR-Repositorio.png)
+![](./assets/1-ECR-Repositorio.png)
 
 3. Ingresar al Repositorio
 
-> > ![](./assets/1-ECR-Ingresar-Repositorio.png)
+![](./assets/1-ECR-Ingresar-Repositorio.png)
 
 4. Ver comandos de Envío
 
-> > ![](./assets/1-ECR-Comandos-Envio.png)
+![](./assets/1-ECR-Comandos-Envio.png)
 
 5. Seguir las siguientes instrucciones
 
-> > ![](./assets/1-ECR-Seguir-Instrucciones.png)
+![](./assets/1-ECR-Seguir-Instrucciones.png)
 
 ### **PUBLICAR IMAGEN DOCKER EN ECR PRIVADO**
 
@@ -221,30 +221,30 @@ Esta [política](./assets/politica-ecr.json) se debe asignar al usuaio con el qu
 
 1. Crear VPC
 
-> > ![](./assets/2-EKS-VPC-Crear.png)
+![](./assets/2-EKS-VPC-Crear.png)
 
 2. Configurar VPC: Numero de zonas 2, Cantidad de Subredes publicas 2, Cantidad de Subredes privadas 2
 
-> > ![](./assets/2-EKS-VPC-Configurar.png)
+![](./assets/2-EKS-VPC-Configurar.png)
 
-> > - Vista Previa
-> >   > ![](./assets/2-EKS-VPC-Configurar-VistaPrevia.png)
+- Vista Previa
+  ![](./assets/2-EKS-VPC-Configurar-VistaPrevia.png)
 
 3. Flujo de trabajo
 
-> > ![](./assets/2-EKS-VPC-FlijoTrabajo.png)
+![](./assets/2-EKS-VPC-FlijoTrabajo.png)
 
 4. Ver VPC
 
-> > ![](./assets/2-EKS-VPC.png)
+![](./assets/2-EKS-VPC.png)
 
 5. Editar Subnet
 
-> > ![](./assets/2-EKS-VPC-Subnet-Editar.png)
+![](./assets/2-EKS-VPC-Subnet-Editar.png)
 
 6. Habilitar IPv4 Publica
 
-> > ![](./assets/2-EKS-VPC-Subnet-HabilitarIPv4Publica.png)
+![](./assets/2-EKS-VPC-Subnet-HabilitarIPv4Publica.png)
 
 #### [**CREAR CLUSTER USANDO EKSCTL**](https://github.com/davejfranco/youtube-tutorial-src/blob/master/tutoriales/kubernetes/eksctl/TUTORIAL.md)
 
