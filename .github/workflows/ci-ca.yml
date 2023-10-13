@@ -1,0 +1,64 @@
+name: CI/CD
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+
+env:
+  DOCKER_REPO: 425536599249.dkr.ecr.us-east-2.amazonaws.com/jmlq/todo-app
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Se descarga el código en el branch
+      - name: Checkout
+        uses: actions/checkout@v3
+      # Instalar dependencias. | permite escribir varios comandos
+      # Ejemplo: cd app && yarn install
+      # Tambien se puede definir el directorio raiz:
+      - name: Install dependences
+        run: |
+          yarn install
+        # working-directory: ./app
+      # Ejecutar Pruebas
+      - name: Run Test
+        run: |
+          yarn test-mock
+
+  cd:
+    needs: ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: AWS authentication
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+          role-duration-seconds: 1200
+          role-session-name: ${{ github.sha }}
+          aws-region: us-east-1
+
+      - name: Login AWS ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Docker build and push
+        run: |
+          docker build -t $DOCKER_REPO:${{ github.sha }} .
+          docker push $DOCKER_REPO:${{ github.sha }}
+        working-directory: ./app
+
+      - name: Deploy to EKS
+        run: |
+          aws eks update-kubeconfig --region us-east-1 --name daveops-eks
+          kubectl set image deployment/app app=$DOCKER_REPO:${{ github.sha }} -n demo

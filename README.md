@@ -64,7 +64,7 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 2. Ejecutar
 
 ```
-    docker build -t jmlqtest/to-do .
+    docker build -t to-do .
 ```
 
 #### **SOLO POR VALIDACION**
@@ -72,26 +72,26 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 1. Crear Contenedor
 
 ```
-    docker container run -dp 85:80 --name to-do-gitactions jmlqtest/to-do
+    docker container run -dp 85:80 --name to-do-gitactions to-do
 ```
 
-2. Subir a Docker Hub (Solo Validacion)
+2. Subir a Docker Hub (Solo si se creo un repositorio)
 
 ```
-    docker push jmlqtest/to-dos
+    docker push jmlq-ima/to-do
 ```
 
-3. Crear un tag en imagen Docker Hub
+3. Crear un tag en imagen Docker Hub (Solo si se creo un repositorio)
 
 ```
-    docker image tag jmlqtest/to-do:latest jmlqtest/to-do:1.0.0
-    docker push jmlqtest/to-do:1.0.0
+    docker image tag jmlq-ima/to-do:latest jmlq-ima/to-do:1.0.0
+    docker push jmlq-ima/to-do:1.0.0
 ```
 
 4. Descargar Imagen Docker Hub
 
 ```
-    docker pull jmlqtest/to-do
+    docker pull jmlq-ima/to-do
 ```
 
 5. **KUBERNET - KUBECTL**
@@ -99,7 +99,9 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 - Ejecutar Kubernete
 
 ```
-        kubectl apply -f todo-app.yml
+        <!-- kubectl apply -f todo-app.yml -->
+        kubectl create -f todo-app.yml
+
         kubectl get pods --watch
         minikube service todo-app-service
 ```
@@ -228,7 +230,8 @@ Esta [política](./assets/politica-ecr.json) se debe asignar al usuaio con el qu
 ![](./assets/2-EKS-VPC-Configurar.png)
 
 - Vista Previa
-  ![](./assets/2-EKS-VPC-Configurar-VistaPrevia.png)
+
+![](./assets/2-EKS-VPC-Configurar-VistaPrevia.png)
 
 3. Flujo de trabajo
 
@@ -284,7 +287,7 @@ Esta [política](./assets/politica-ecr.json) se debe asignar al usuaio con el qu
 
 #### [**GITHUB ACTIONS**](https://docs.github.com/es/actions)
 
-1. Archivo GitHub Actions [Github Actions](./.github/workflows/demo-github-actions.yml). Es un Workflow demo para saber como funciona `Github Actions`.
+1. Archivo GitHub Actions [Github Actions](./.github/workflows/demo-github-actions.txt). Es un Workflow demo para saber como funciona `Github Actions`.
 
 ### TIPS GIT
 
@@ -298,4 +301,8 @@ Esta [política](./assets/politica-ecr.json) se debe asignar al usuaio con el qu
 
 ```
 
-2. Archivo GitHub Actions [Github Actions](./.github/workflows/todo-actions.yml). Es un Workflow para cargar image `Docker` a `ECR` y a `EKS` con `Github Actions`.
+2. Archivo GitHub Actions [Github Actions](./.github/workflows/ci-ca.yml). Es un Workflow para cargar image `Docker` a `ECR` y a `EKS` con `Github Actions`.
+
+3. Configurar Accesos
+
+> -
