@@ -96,9 +96,17 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 5. **KUBERNET - KUBECTL**
 
-- Ejecutar Kubernete
+- Ejecutar [Kubernete con imagen de AWS](https://skryvets.com/blog/2021/03/15/kubernetes-pull-image-from-private-ecr-registry/)
 
 ```
+        <!-- Login a la imagen ECR-->
+        <!-- aws ecr get-login-password --region region-name | docker login --username AWS --password-stdin aws_account_id.dkr.ecr.region-name.amazonaws.com -->
+        aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 425536599249.dkr.ecr.us-east-2.amazonaws.com
+
+
+        <!-- Obtener credenciales Usuario AWS -->
+        aws ecr get-login-password
+        docker login
         <!-- kubectl apply -f todo-app.yml -->
         kubectl create -f todo-app.yml
 
@@ -113,6 +121,8 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
         kubectl delete deployment todo-app-deployment
         kubectl get services
         kubectl delete service todo-app-service
+        kubectl get secrets
+        kubectl delete secret regcred
 ```
 
 ## PUBLICAR EN AWS
@@ -265,6 +275,10 @@ Esta [política](./assets/politica-ecr.json) se debe asignar al usuaio con el qu
 
 ```
         eksctl create cluster -f cluster.yml
+
+        <!-- eksctl eksctl get iamidentitymapping --cluster <clusterName> --region=us-east-2 -->
+
+        eksctl eksctl get iamidentitymapping --cluster jmlq-eks-test --region=us-east-2
 ```
 
 4. Colocar un alias al Cluster
@@ -276,7 +290,7 @@ Esta [política](./assets/politica-ecr.json) se debe asignar al usuaio con el qu
 5. Obtener los nodos
 
 ```
-        k get nodes
+        eksctl get nodes
 ```
 
 6. Eliminar Cluster EKS - Cuando ya no se usa
@@ -305,4 +319,133 @@ Esta [política](./assets/politica-ecr.json) se debe asignar al usuaio con el qu
 
 3. Configurar Accesos
 
-> -
+> - En GitHub Actions - [OpenID Connect in AWS](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services) copiar la URL y Audence que se van a usar para crear las credenciales de acceso en IAM.
+
+![](./assets/3-CICD-GitHub-Actions-Credenciales.png)
+
+URL: https://token.actions.githubusercontent.com
+Audience: sts.amazonaws.com
+
+> - En `IAM` ir a `Identity Providers`
+
+![](./assets/3-CICD-IAM-IdentidadProveedores.png)
+
+> - Pegar la URL y Audence para obtener Huella de Identidad
+
+![](./assets/3-CICD-IAM-IdentidadProveedores-ObtenerHuella.png)
+
+> - Agregar Proveedor
+
+![](./assets/3-CICD-IAM-AgregarProveedor.png)
+
+4. Crear Rol para conectarse al Kluster
+
+> - Crear Politica Personalizada jmlq-eks-access-policy
+
+```
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "VisualEditor0",
+			"Effect": "Allow",
+			"Action": [
+				"eks:DescribeCluster",
+				"eks:ListClusters"
+			],
+			"Resource": "*"
+		}
+	]
+}
+```
+
+> - Seleccionar Entidad de Confianza
+
+![](./assets/3-CICD-IAM-Rol-1.png)
+
+> - Agregar Permisos
+
+![](./assets/3-CICD-IAM-Rol-AgregarPermisos.png)
+
+> - Crear Rol
+
+![](./assets/3-CICD-IAM-Rol-Crear.png)
+
+> - En GitHub Actions - [OpenID Connect in AWS](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services) copiar Codiciones. **NO SE PUDO**
+
+![](./assets/3-CICD-GitHub-Actions-Conditions.png)
+
+```
+                "StringLike": {
+                    "token.actions.githubusercontent.com:sub": "repo:MLahuasi/todo-app-aws:*"
+                },
+                "StringEquals": {
+                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+                }
+
+```
+
+> - En el Rol creado en `IAM` editar las politicas con los valores especificados en GitHub Actions. **NOTA**: Se cambia el nombre del repositorio.
+
+![](./assets/3-CICD-IAM-Rol-Editar-RelacionesConfianza.png)
+
+> - Agregar al usuario la política `AmazonEC2ContainerRegistryPowerUser`
+
+![](./assets/3-CICD-IAM-Rol-Editar-AmazonEC2ContainerRegistryPowerUser.png)
+
+4. Configurar Rol en `GitHub`
+
+> - Ir a Settings
+
+![](./assets/3-CICD-GitHub-ConfigurarRol-Settings.png)
+
+> - Ir a Secrets and Variables/Actions
+
+![](./assets/3-CICD-GitHub-ConfigurarRol-SecretsVariables.png)
+
+> - New Secret
+
+![](./assets/3-CICD-GitHub-ConfigurarRol-NewSecret.png)
+
+> - Asignar un nombre y pegar el arn del `Rol`
+
+![](./assets/3-CICD-GitHub-ConfigurarRol-NewSecret-Valores.png)
+
+> - Configurar job `cd` (Deploy Continuo) en [Workflow](./.github/workflows/ci-ca.yml). Para configurar
+
+```
+      - name: AWS authentication
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+          role-duration-seconds: 1200
+          role-session-name: ${{ github.sha }}
+          aws-region: us-east-2
+```
+
+> > - Configurar Login a la imagen ECR
+
+```
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+        Es igual al comando:
+
+        aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 425536599249.dkr.ecr.us-east-2.amazonaws.com
+```
+
+> > - Construir y Subir Imagen desde Docker
+
+```
+        run: |
+          docker build -t $DOCKER_REPO:${{ github.sha }} .
+          docker push $DOCKER_REPO:${{ github.sha }}
+```
+
+> > - Desplegar la Imagen en EKS
+
+```
+        run: |
+          aws eks update-kubeconfig --region us-east-2 --name jmlq-eks-test
+          kubectl set image deployment/app app=$DOCKER_REPO:${{ github.sha }} -n demo
+```

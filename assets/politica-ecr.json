@@ -1,0 +1,32 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Statement1",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchGetImage",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:InitiateLayerUpload",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart",
+        "ecr:CreateRepository",
+        "ecr:DescribeImages",
+        "ecr:GetAuthorizationToken",
+        "ecr:DeleteRepository",
+        "ecr:DescribeRepositories",
+        "ecr-public:BatchCheckLayerAvailability",
+        "ecr-public:PutImage",
+        "ecr-public:CreateRepository",
+        "ecr-public:DescribeImages",
+        "ecr-public:GetAuthorizationToken",
+        "ecr-public:DeleteRepository",
+        "ecr-public:DescribeRepositories",
+        "sts:GetServiceBearerToken"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
