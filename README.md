@@ -452,3 +452,23 @@ Audience: sts.amazonaws.com
           aws eks update-kubeconfig --region us-east-2 --name jmlq-eks-test
           kubectl set image deployment/app app=$DOCKER_REPO:${{ github.sha }} -n demo
 ```
+
+```
+        <!-- Login a la imagen ECR-->
+        <!-- aws ecr get-login-password --region region-name | docker login --username AWS --password-stdin aws_account_id.dkr.ecr.region-name.amazonaws.com -->
+        aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 425536599249.dkr.ecr.us-east-2.amazonaws.com
+
+
+        <!-- Obtener credenciales Usuario AWS -->
+        aws ecr get-login-password
+        docker login
+        <!-- kubectl apply -f todo-app.yml -->
+        kubectl create -f todo-app.yml
+
+        kubectl get pods --watch
+        minikube service todo-app-service
+```
+
+```
+
+```
