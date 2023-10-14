@@ -453,6 +453,8 @@ Audience: sts.amazonaws.com
           kubectl set image deployment/app app=$DOCKER_REPO:${{ github.sha }} -n demo
 ```
 
+### EJECUTAR ANTES DEL PUSH
+
 ```
         <!-- Login a la imagen ECR-->
         <!-- aws ecr get-login-password --region region-name | docker login --username AWS --password-stdin aws_account_id.dkr.ecr.region-name.amazonaws.com -->
@@ -467,8 +469,4 @@ Audience: sts.amazonaws.com
 
         kubectl get pods --watch
         minikube service todo-app-service
-```
-
-```
-
 ```
