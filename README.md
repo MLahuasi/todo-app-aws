@@ -276,9 +276,12 @@ Esta [política](./assets/politica-ecr.json) se debe asignar al usuaio con el qu
 ```
         eksctl create cluster -f cluster.yml
 
-        <!-- eksctl eksctl get iamidentitymapping --cluster <clusterName> --region=us-east-2 -->
 
-        eksctl eksctl get iamidentitymapping --cluster jmlq-eks-test --region=us-east-2
+        eksctl create iamidentitymapping --cluster jmlq-eks-test --region=us-east-2 --arn arn:aws:iam::425536599249:role/jmlq-github-action-role --group system:masters --username admin
+
+        <!-- eksctl get iamidentitymapping --cluster <clusterName> --region=us-east-2 -->
+
+        eksctl get iamidentitymapping --cluster jmlq-eks-test --region=us-east-2
 ```
 
 4. Colocar un alias al Cluster
@@ -290,7 +293,7 @@ Esta [política](./assets/politica-ecr.json) se debe asignar al usuaio con el qu
 5. Obtener los nodos
 
 ```
-        eksctl get nodes
+        kubectl get nodes
 ```
 
 6. Eliminar Cluster EKS - Cuando ya no se usa
