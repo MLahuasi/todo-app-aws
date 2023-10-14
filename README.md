@@ -287,7 +287,7 @@ Esta [política](./assets/politica-ecr.json) se debe asignar al usuaio con el qu
 4. Colocar un alias al Cluster
 
 ```
-        aws eks update-kubeconfig --region us-east-2 --name name-cluster --alias nombre-alias
+        aws eks update-kubeconfig --region us-east-2 --name jmlq-eks-test --alias jmlq-cluster-alias
 ```
 
 5. Obtener los nodos
