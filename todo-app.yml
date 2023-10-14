@@ -11,7 +11,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: todo-app-deployment
-  # namespace: health-check
 spec:
   replicas: 1
   selector:
@@ -36,7 +35,6 @@ kind: Service
 metadata:
   # Servicio que va a comunicar a los contenedores por su IP
   name: todo-app-service
-  # namespace: health-check
 spec:
   # Exponer el servicio al mundo exterior
   type: NodePort
