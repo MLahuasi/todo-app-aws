@@ -1,0 +1,42 @@
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: jmlq-eks-test
+  region: us-east-2
+  version: "1.27"
+
+vpc:
+  id: "vpc-0e266a44fa61692f9"
+  clusterEndpoints:
+    publicAccess: true
+    privateAccess: true
+  subnets:
+    public:
+      public-1-us-east-2a:
+        id: "subnet-05f2a52524af01de1"
+      public-2-us-east-2b:
+        id: "subnet-079f6a66577fca5b0"
+    private:
+      private-1-us-east-2a:
+        id: "subnet-01891145d41ed55bc"
+      private-2-us-east-2b:
+        id: "subnet-0cd31ea7df82336d0"
+
+managedNodeGroups:
+  - name: jmlq-nodegroup-test-1
+    instanceType: t3.micro
+    privateNetworking: false
+    minSize: 1
+    maxSize: 2
+    desiredCapacity: 1
+    volumeSize: 30
+    labels: { node-group-type: managed }
+    tags:
+      nodegroup-role: worker
+# jmlq-eks-vpc-test-subnet-public1-us-east-2a subnet-05f2a52524af01de1
+# jmlq-eks-vpc-test-subnet-public2-us-east-2b subnet-079f6a66577fca5b0
+
+# jmlq-eks-vpc-test-subnet-private1-us-east-2a subnet-01891145d41ed55bc
+# jmlq-eks-vpc-test-subnet-private2-us-east-2b subnet-0cd31ea7df82336d0

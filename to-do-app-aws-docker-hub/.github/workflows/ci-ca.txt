@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    # Tomar código desde nuestro repositorio. NOTA: fetch-depth va hasta el commit raiz
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    # Obtener versión publicación
+    - name: Git Semantic Version
+      uses: PaulHatch/semantic-version@v4.0.3  
+      with:
+        # Si viene la palabra "major:" en el commit 
+        major_pattern: "major:"
+        # Si viene la palabra "feat:" en el commit
+        minor_pattern: "feat:"
+        # Formato version
+        format: "${major}.${minor}.${patch}-prerelease${increment}"
+      id: version
+    # Autentificarse usando los secretos almacenados en el reposutorio
+                
+    - name: Docker Login
+      env:
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: | 
+        echo "Iniciando Login"
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+        echo "Fin Login"
+    # Contruir Imagen
+    - name: Build Docker Image
+      env:
+        NEW_VERSION: ${{ steps.version.outputs.version }}
+      run: |
+        echo "Iniciando Build"
+        docker build -t codediaz/to-do-app:$NEW_VERSION .
+        docker build -t codediaz/to-do-app:latest .
+        echo "Finalizando Build"
+    # Subir Imagen a DockerHub
+    - name: Push Docker Image
+      env:
+        NEW_VERSION: ${{ steps.version.outputs.version }}
+      run: |
+        echo "Iniciando Push"
+        docker push codediaz/to-do-app:$NEW_VERSION
+        docker push codediaz/to-do-app:latest
+        echo "Finalizando Push"
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with: 
+        aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+        aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+        aws-region: us-east-1
+
+    - name: Cluster config
+      run: |
+       aws eks update-kubeconfig --region us-east-1 --name eks-grupo0 --alias eks-grupo0
+
+
+    - name: Cluster Kubectl
+      run: |
+        kubectl delete deployment to-do-app-deployment -n grupo3 
+        kubectl apply -f app-deployment.yaml -n grupo3
+        kubectl apply -f app-service.yaml -n grupo3
+
+      
+
+
